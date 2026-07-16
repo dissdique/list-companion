@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -464,6 +465,8 @@
   (async function boot(){
     if(code){
       showView('lists');
+      $('lists-grid').innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:20px 4px;">Connecting to your lists… this can take up to a minute if it hasn\'t been used in a while.</div>';
+      setSyncStatus('Connecting…');
       await pullLists();
       startPolling();
     } else {
