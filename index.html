@@ -3,297 +3,317 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=600, height=600, initial-scale=1, user-scalable=no">
-<meta name="mrbd-web-app-capable" content="yes">
-<title>Lists</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lists · Companion</title>
 <style>
   :root{
-    --bg:#000;
-    --fg:#f2f2f2;
-    --dim:#6b6b6b;
-    --accent:#ffb000;
-    --danger:#ff5a4e;
+    --bg:#fbf8f3;
+    --surface:#ffffff;
+    --ink:#20201d;
+    --ink-dim:#7a766d;
+    --line:#e8e2d6;
+    --accent:#c4790a;
+    --accent-soft:#fbeedb;
+    --danger:#b3392b;
   }
-  html,body{
-    margin:0; padding:0;
-    width:600px; height:600px;
-    background:var(--bg);
-    color:var(--fg);
-    overflow:hidden;
-    font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  #app{ width:600px; height:600px; position:relative; }
-  .screen{
-    position:absolute; top:0; left:0;
-    width:600px; height:600px;
-    display:none;
-    flex-direction:column;
-    box-sizing:border-box;
-    padding:28px 30px;
-  }
-  .screen.active{ display:flex; }
-
-  .header{
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); }
+  body{
+    font-family: "Iowan Old Style","Georgia",serif;
+    min-height:100vh;
     display:flex;
-    justify-content:space-between;
+    flex-direction:column;
+  }
+  .ui{ font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+  header{
+    padding:22px 20px 14px;
+    display:flex;
     align-items:baseline;
-    margin-bottom:14px;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
   }
-  .title{
-    font-size:32px;
+  header h1{
+    font-size:22px;
+    margin:0;
     font-weight:600;
-    letter-spacing:0.3px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:420px;
+    letter-spacing:0.2px;
   }
-  .count{ font-size:16px; color:var(--dim); }
-
-  .scroll{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    overflow:hidden;
-  }
-  .empty-hint{
-    color:var(--dim);
-    font-size:18px;
-    margin-top:40px;
-    line-height:1.5;
-    white-space:pre-line;
+  header .sub{
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
   }
 
-  .row{
+  main{ flex:1; padding:18px 18px 90px; max-width:520px; width:100%; margin:0 auto; }
+
+  /* ---------- PAIRING ---------- */
+  .pair-wrap{
+    margin-top:14vh;
+    text-align:center;
+  }
+  .pair-wrap .kicker{
+    font-family: -apple-system, sans-serif;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+  }
+  .pair-wrap h2{
+    font-size:26px;
+    margin:0 0 22px;
+  }
+  .code-input{
+    font-family: -apple-system, sans-serif;
+    width:100%;
+    font-size:32px;
+    letter-spacing:10px;
+    text-align:center;
+    text-transform:uppercase;
+    padding:16px 10px;
+    border-radius:14px;
+    border:2px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  .code-input:focus{ outline:none; border-color:var(--accent); }
+  .btn{
+    font-family: -apple-system, sans-serif;
+    display:block;
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+  }
+  .btn:disabled{ opacity:0.5; }
+  .btn.ghost{
+    background:none;
+    color:var(--ink-dim);
+    border:1px solid var(--line);
+  }
+  .status-line{
+    font-family: -apple-system, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:14px;
+    min-height:18px;
+  }
+  .status-line.err{ color:var(--danger); }
+
+  /* ---------- LISTS ---------- */
+  .lists-grid{ display:flex; flex-direction:column; gap:10px; }
+  .list-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px 18px;
     display:flex;
     align-items:center;
-    gap:14px;
-    padding:11px 12px;
-    border-radius:10px;
-    font-size:22px;
-    border:2px solid transparent;
+    justify-content:space-between;
   }
-  .row.focused{
-    border-color:var(--accent);
-    background:rgba(255,176,0,0.08);
+  .list-card .name{ font-size:19px; font-weight:600; }
+  .list-card .meta{
+    font-family: -apple-system, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:2px;
   }
-  .row.back{ color:var(--dim); font-size:19px; }
-  .row.back.focused{ color:var(--accent); }
-  .row.add{ color:var(--fg); }
-  .row.add.focused{ color:var(--accent); }
+  .list-card .chev{ color:var(--ink-dim); font-size:20px; }
 
-  .box{
-    width:22px; height:22px; min-width:22px;
-    border-radius:5px;
-    border:2px solid var(--fg);
-    display:flex; align-items:center; justify-content:center;
+  .add-row{
+    display:flex; gap:10px; margin-top:16px;
+  }
+  .add-row input{
+    font-family: inherit;
+    flex:1;
+    font-size:16px;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--surface);
+  }
+  .add-row input:focus{ outline:none; border-color:var(--accent); }
+  .add-row button{
+    font-family: -apple-system, sans-serif;
     font-size:15px;
-  }
-  .row.done .box{ border-color:var(--accent); background:var(--accent); color:#000; }
-  .row.done .item-text{ color:var(--dim); text-decoration: line-through; }
-  .item-text{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-  .list-name{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .list-meta{ color:var(--dim); font-size:16px; }
-
-  .actions{ display:flex; gap:12px; margin-top:14px; }
-  .action-btn{
-    flex:1; text-align:center;
-    padding:14px 8px;
-    border-radius:12px;
-    font-size:18px; font-weight:600;
-    border:2px solid var(--dim);
-    color:var(--fg);
-    white-space:nowrap;
-  }
-  .action-btn.focused{
-    border-color:var(--accent); color:var(--accent);
-    background:rgba(255,176,0,0.08);
+    font-weight:600;
+    padding:0 20px;
+    border-radius:14px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
   }
 
-  /* KEYPAD */
-  .kp-preview{
-    font-size:26px;
-    min-height:44px;
-    border-bottom:2px solid var(--dim);
-    padding-bottom:12px;
-    margin-bottom:20px;
-    word-break:break-word;
+  /* ---------- LIST DETAIL ---------- */
+  .back-link{
+    font-family: -apple-system, sans-serif;
+    color:var(--ink-dim);
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:16px;
   }
-  .kp-preview .cursor{
-    display:inline-block; width:2px; height:24px;
-    background:var(--accent); margin-left:2px; vertical-align:middle;
+  .item-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:8px;
   }
-  .kp-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
-  .kp-key{
-    aspect-ratio: 1;
-    display:flex; align-items:center; justify-content:center;
-    font-size:22px; border-radius:10px;
-    border:2px solid var(--dim); color:var(--fg);
+  .item-row input[type=checkbox]{
+    width:22px; height:22px;
+    accent-color: var(--accent);
   }
-  .kp-key.focused{ border-color:var(--accent); color:var(--accent); background:rgba(255,176,0,0.08); }
-  .kp-bottom{ display:flex; gap:8px; margin-top:8px; }
-  .kp-bottom .kp-key{ flex:1; aspect-ratio:unset; font-size:20px; font-weight:600; height:56px; }
+  .item-row .text{ flex:1; font-size:17px; }
+  .item-row.done .text{ color:var(--ink-dim); text-decoration:line-through; }
+  .item-row .del{
+    font-family: -apple-system, sans-serif;
+    color:var(--ink-dim);
+    font-size:13px;
+    padding:6px 8px;
+  }
 
-  /* SHARE */
-  .share-text{
-    flex:1; font-size:19px; line-height:1.6;
-    white-space:pre-wrap; overflow:hidden;
-    border:2px solid var(--dim); border-radius:12px;
-    padding:16px; margin-bottom:16px;
+  .share-btn{
+    font-family: -apple-system, sans-serif;
+    margin-top:18px;
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    font-size:15px;
+    font-weight:600;
   }
-  .share-status{ text-align:center; color:var(--dim); font-size:16px; margin-top:6px; min-height:20px; }
 
-  /* PAIRING */
-  .pair-code{
-    font-size:64px;
-    font-weight:700;
-    letter-spacing:8px;
-    color:var(--accent);
+  footer{
+    font-family: -apple-system, sans-serif;
     text-align:center;
-    margin:34px 0 22px;
+    font-size:12px;
+    color:var(--ink-dim);
+    padding:14px;
   }
-  .pair-body{ flex:1; display:flex; flex-direction:column; justify-content:center; }
-  .pair-step{ font-size:18px; color:var(--fg); line-height:1.6; margin-bottom:8px; }
-  .pair-url{ color:var(--accent); font-size:19px; text-align:center; margin-bottom:26px; }
-  .sync-dot{
-    display:inline-block; width:8px; height:8px; border-radius:50%;
-    background:var(--dim); margin-right:6px; vertical-align:middle;
-  }
-  .sync-dot.ok{ background:#3ddc84; }
-  .sync-dot.err{ background:var(--danger); }
-
-  .hint{ text-align:center; color:var(--dim); font-size:14px; margin-top:14px; }
+  .hide{ display:none !important; }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- PAIRING SCREEN -->
-  <div class="screen" id="screen-pairing">
-    <div class="header">
-      <div class="title" style="font-size:26px;">Pair your phone</div>
-    </div>
-    <div class="pair-body">
-      <div class="pair-code" id="pair-code">------</div>
-      <div class="pair-url">dissdique.github.io/list-companion/</div>
-      <div class="pair-step">1. Open the companion page on your phone</div>
-      <div class="pair-step">2. Enter this code</div>
-      <div class="pair-step">3. Add lists there — your glasses will sync automatically</div>
-    </div>
-    <div class="actions">
-      <div class="action-btn focused" id="pair-continue">Continue</div>
-    </div>
-    <div class="hint" id="pair-status">Enter · to go to your lists</div>
-  </div>
+<header class="ui">
+  <h1>Lists</h1>
+  <div class="sub" id="sync-status">·</div>
+</header>
 
-  <!-- LISTS (top-level) SCREEN -->
-  <div class="screen" id="screen-lists">
-    <div class="header">
-      <div class="title">Lists</div>
-      <div class="count"><span class="sync-dot" id="sync-dot"></span><span id="lists-count">0 lists</span></div>
-    </div>
-    <div class="scroll" id="lists-scroll"></div>
-    <div class="hint">↑↓ move · Enter select</div>
-  </div>
+<main>
 
-  <!-- LIST DETAIL SCREEN -->
-  <div class="screen" id="screen-list">
-    <div class="header">
-      <div class="title" id="list-title">List</div>
-      <div class="count" id="list-count">0 items</div>
-    </div>
-    <div class="scroll" id="list-scroll"></div>
-    <div class="hint">↑↓ move · Enter select</div>
-  </div>
+  <!-- PAIRING VIEW -->
+  <section id="view-pair" class="pair-wrap hide">
+    <div class="kicker">Connect to your glasses</div>
+    <h2>Enter your pairing code</h2>
+    <input class="code-input" id="code-input" maxlength="6" placeholder="------" autocapitalize="characters" autocomplete="off" autocorrect="off" inputmode="text">
+    <button class="btn" id="pair-btn">Connect</button>
+    <div class="status-line" id="pair-status">Find this code on your glasses, under "Pairing code" in the Lists menu.</div>
+  </section>
 
-  <!-- KEYPAD SCREEN -->
-  <div class="screen" id="screen-keypad">
-    <div class="kp-preview" id="kp-preview"><span class="cursor"></span></div>
-    <div class="kp-grid" id="kp-grid"></div>
-    <div class="kp-bottom">
-      <div class="kp-key" id="kp-cancel">Cancel</div>
-      <div class="kp-key" id="kp-done">Done</div>
+  <!-- LISTS VIEW -->
+  <section id="view-lists" class="hide">
+    <div class="lists-grid" id="lists-grid"></div>
+    <div class="add-row">
+      <input type="text" id="new-list-input" placeholder="New list name…" autocomplete="off">
+      <button id="new-list-btn">Add</button>
     </div>
-  </div>
+  </section>
 
-  <!-- SHARE SCREEN -->
-  <div class="screen" id="screen-share">
-    <div class="header">
-      <div class="title" id="share-title" style="font-size:28px;">Share list</div>
+  <!-- LIST DETAIL VIEW -->
+  <section id="view-detail" class="hide">
+    <div class="back-link" id="back-link">&larr; All lists</div>
+    <h2 id="detail-title" style="margin:0 0 16px;"></h2>
+    <div id="items-container"></div>
+    <div class="add-row">
+      <input type="text" id="new-item-input" placeholder="Add an item…" autocomplete="off">
+      <button id="new-item-btn">Add</button>
     </div>
-    <div class="share-text" id="share-text"></div>
-    <div class="actions">
-      <div class="action-btn" id="btn-back">Back</div>
-      <div class="action-btn" id="btn-send">Text list</div>
-    </div>
-    <div class="share-status" id="share-status"></div>
-  </div>
+    <button class="share-btn" id="share-btn">Share this list</button>
+  </section>
 
-</div>
+</main>
+
+<footer>Syncs automatically with your Meta Ray-Ban Display glasses</footer>
 
 <script>
 (function(){
   // ---- CONFIGURE THIS after you deploy the backend ----
-  const BACKEND_URL = 'https://displaylist-sync.onrender.com';
-  const CODE_KEY = 'mrbd-sync-code';
-  const CACHE_KEY = 'mrbd-lists-cache-v3';
-  const POLL_MS = 5000;
+  const BACKEND_URL = 'https://list-backend-0dsb.onrender.com';
+  const CODE_KEY = 'mrbd-companion-code';
+  const POLL_MS = 4000;
 
-  /* ---------------- state ---------------- */
-  let lists = loadCache();
-  let code = localStorage.getItem(CODE_KEY) || null;
+  let code = localStorage.getItem(CODE_KEY) || '';
+  let lists = [];
   let currentListId = null;
-  let screen = 'lists'; // pairing | lists | list | keypad | share
-  let listsFocus = 0;
-  let listFocus = 0;
-  let keypadMode = 'newlist'; // 'newlist' | 'additem'
-  let draft = '';
-  let kpRow = 0, kpCol = 0;
-  let shareFocus = 0;
   let pollTimer = null;
 
-  function loadCache(){
-    try{
-      const raw = localStorage.getItem(CACHE_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      return (parsed && Array.isArray(parsed)) ? parsed : [];
-    }catch(e){ return []; }
-  }
-  function saveCache(){
-    try{ localStorage.setItem(CACHE_KEY, JSON.stringify(lists)); }catch(e){}
-  }
-  function currentList(){ return lists.find(l => l.id === currentListId); }
-  function makeId(){ return 'l' + Date.now() + Math.floor(Math.random()*1000); }
+  const $ = (id) => document.getElementById(id);
+
   function escapeHtml(s){
     return (s||'').replace(/[&<>"']/g, c => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[c]));
   }
 
-  /* ---------------- sync ---------------- */
-  function setSyncDot(state){
-    const dot = document.getElementById('sync-dot');
-    if(!dot) return;
-    dot.classList.remove('ok','err');
-    if(state==='ok') dot.classList.add('ok');
-    if(state==='err') dot.classList.add('err');
+  function setSyncStatus(text, isErr){
+    $('sync-status').textContent = text;
+    $('sync-status').style.color = isErr ? '#b3392b' : '';
   }
 
-  async function ensurePaired(){
-    if(code) return;
-    try{
-      const res = await fetch(`${BACKEND_URL}/api/session`, { method:'POST' });
-      const data = await res.json();
-      code = data.code;
-      localStorage.setItem(CODE_KEY, code);
-    }catch(e){
-      // will retry on next pull/push attempt
+  function currentList(){ return lists.find(l => l.id === currentListId); }
+  function makeId(){ return 'l' + Date.now() + Math.floor(Math.random()*1000); }
+
+  /* ---------------- view switching ---------------- */
+  function showView(name){
+    ['pair','lists','detail'].forEach(v => {
+      $('view-' + v).classList.toggle('hide', v !== name);
+    });
+  }
+
+  /* ---------------- pairing ---------------- */
+  $('pair-btn').addEventListener('click', async ()=>{
+    const val = $('code-input').value.trim().toUpperCase();
+    if(val.length < 4){
+      $('pair-status').textContent = 'Enter the 6-character code from your glasses.';
+      $('pair-status').classList.add('err');
+      return;
     }
-  }
+    $('pair-btn').disabled = true;
+    $('pair-status').textContent = 'Checking…';
+    $('pair-status').classList.remove('err');
+    try{
+      const res = await fetch(`${BACKEND_URL}/api/pair/${val}`);
+      const data = await res.json();
+      if(data.valid){
+        code = val;
+        localStorage.setItem(CODE_KEY, code);
+        await pullLists();
+        showView('lists');
+        startPolling();
+      } else {
+        $('pair-status').textContent = "That code wasn't recognized. Double-check it on your glasses.";
+        $('pair-status').classList.add('err');
+      }
+    }catch(e){
+      $('pair-status').textContent = "Couldn't reach the server. Check your connection and try again.";
+      $('pair-status').classList.add('err');
+    }
+    $('pair-btn').disabled = false;
+  });
 
+  /* ---------------- sync ---------------- */
   async function pullLists(){
     if(!code) return;
     try{
@@ -301,346 +321,155 @@
       if(!res.ok) throw new Error('bad response');
       const data = await res.json();
       lists = data.lists || [];
-      saveCache();
-      setSyncDot('ok');
-      if(screen==='lists') renderLists();
-      if(screen==='list') renderListDetail();
+      setSyncStatus('Synced');
+      renderCurrentView();
     }catch(e){
-      setSyncDot('err');
+      setSyncStatus('Offline', true);
     }
   }
-
   async function pushLists(){
-    if(!code){ saveCache(); return; }
-    saveCache();
+    if(!code) return;
     try{
       await fetch(`${BACKEND_URL}/api/lists/${code}`, {
         method:'PUT',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ lists })
       });
-      setSyncDot('ok');
+      setSyncStatus('Synced');
     }catch(e){
-      setSyncDot('err');
+      setSyncStatus('Offline', true);
     }
   }
-
   function startPolling(){
     if(pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(()=>{
-      if(screen==='lists' || screen==='list') pullLists();
-    }, POLL_MS);
+    pollTimer = setInterval(pullLists, POLL_MS);
+  }
+  function renderCurrentView(){
+    if(!$('view-detail').classList.contains('hide')) renderDetail();
+    else if(!$('view-lists').classList.contains('hide')) renderLists();
   }
 
-  /* ---------------- keypad layout ---------------- */
-  const KP_ROWS = [
-    ['A','B','C','D','E','F','G'],
-    ['H','I','J','K','L','M','N'],
-    ['O','P','Q','R','S','T','U'],
-    ['V','W','X','Y','Z','␣','⌫']
-  ];
-  function keyAt(r,c){ return KP_ROWS[r][c]; }
-
-  /* ---------------- screen switching ---------------- */
-  const screens = {
-    pairing: document.getElementById('screen-pairing'),
-    lists: document.getElementById('screen-lists'),
-    list: document.getElementById('screen-list'),
-    keypad: document.getElementById('screen-keypad'),
-    share: document.getElementById('screen-share')
-  };
-  function showScreen(name){
-    screen = name;
-    Object.keys(screens).forEach(k => screens[k].classList.toggle('active', k===name));
-    if(name==='pairing') renderPairing();
-    if(name==='lists') renderLists();
-    if(name==='list') renderListDetail();
-    if(name==='keypad') renderKeypad();
-    if(name==='share') renderShare();
-  }
-
-  /* ---------------- PAIRING screen ---------------- */
-  function renderPairing(){
-    document.getElementById('pair-code').textContent = code || '------';
-  }
-  function handlePairingInput(key){
-    if(key==='Enter'){
-      showScreen('lists');
-    }
-  }
-
-  /* ---------------- LISTS screen ---------------- */
+  /* ---------------- LISTS view ---------------- */
   function renderLists(){
-    const scroll = document.getElementById('lists-scroll');
-    const countLabel = document.getElementById('lists-count');
-    scroll.innerHTML = '';
-
-    if(lists.length===0){
-      const hint = document.createElement('div');
-      hint.className = 'empty-hint';
-      hint.textContent = 'No lists yet.\nAdd one here, or from your paired phone.';
-      scroll.appendChild(hint);
-    } else {
-      lists.forEach((l, i)=>{
-        const done = l.items.filter(it=>it.done).length;
-        const row = document.createElement('div');
-        row.className = 'row' + (listsFocus===i ? ' focused':'');
-        row.innerHTML = `<div class="list-name">${escapeHtml(l.name)}</div><div class="list-meta">${done}/${l.items.length}</div>`;
-        scroll.appendChild(row);
-      });
-    }
-
-    const addRow = document.createElement('div');
-    addRow.className = 'row add' + (listsFocus===lists.length ? ' focused':'');
-    addRow.textContent = '+ New list';
-    scroll.appendChild(addRow);
-
-    const pairRow = document.createElement('div');
-    pairRow.className = 'row back' + (listsFocus===lists.length+1 ? ' focused':'');
-    pairRow.textContent = 'Pairing code';
-    scroll.appendChild(pairRow);
-
-    countLabel.textContent = lists.length ? `${lists.length} list${lists.length===1?'':'s'}` : '0 lists';
-  }
-
-  function handleListsInput(key){
-    const maxIndex = lists.length + 1; // + new list + pairing code
-    if(key==='ArrowUp'){
-      listsFocus = Math.max(0, listsFocus-1);
-      renderLists();
-    } else if(key==='ArrowDown'){
-      listsFocus = Math.min(maxIndex, listsFocus+1);
-      renderLists();
-    } else if(key==='Enter'){
-      if(listsFocus < lists.length){
-        currentListId = lists[listsFocus].id;
-        listFocus = 0;
-        showScreen('list');
-      } else if(listsFocus === lists.length){
-        keypadMode = 'newlist';
-        draft = '';
-        kpRow = 0; kpCol = 0;
-        showScreen('keypad');
-      } else {
-        showScreen('pairing');
-      }
-    }
-  }
-
-  /* ---------------- LIST DETAIL screen ---------------- */
-  function renderListDetail(){
-    const list = currentList();
-    if(!list){ showScreen('lists'); return; }
-
-    document.getElementById('list-title').textContent = list.name;
-    const doneCount = list.items.filter(i=>i.done).length;
-    document.getElementById('list-count').textContent = list.items.length ? `${doneCount}/${list.items.length} done` : '0 items';
-
-    const scroll = document.getElementById('list-scroll');
-    scroll.innerHTML = '';
-
-    const backRow = document.createElement('div');
-    backRow.className = 'row back' + (listFocus===0 ? ' focused':'');
-    backRow.textContent = '< Lists';
-    scroll.appendChild(backRow);
-
-    if(list.items.length===0){
-      const hint = document.createElement('div');
-      hint.className = 'empty-hint';
-      hint.textContent = 'No items yet.\nSelect "+ Add item" below.';
-      scroll.appendChild(hint);
-    } else {
-      list.items.forEach((item, i)=>{
-        const idx = i + 1;
-        const row = document.createElement('div');
-        row.className = 'row' + (item.done ? ' done':'') + (listFocus===idx ? ' focused':'');
-        row.innerHTML = `<div class="box">${item.done ? '✓' : ''}</div><div class="item-text">${escapeHtml(item.text)}</div>`;
-        scroll.appendChild(row);
-      });
-    }
-
-    const addIdx = list.items.length + 1;
-    const shareIdx = list.items.length + 2;
-    const addRow = document.createElement('div');
-    addRow.className = 'row add' + (listFocus===addIdx ? ' focused':'');
-    addRow.textContent = '+ Add item';
-    scroll.appendChild(addRow);
-
-    const shareRow = document.createElement('div');
-    shareRow.className = 'row add' + (listFocus===shareIdx ? ' focused':'');
-    shareRow.textContent = 'Share this list';
-    scroll.appendChild(shareRow);
-  }
-
-  function handleListDetailInput(key){
-    const list = currentList();
-    if(!list) return;
-    const maxIndex = list.items.length + 2;
-    if(key==='ArrowUp'){
-      listFocus = Math.max(0, listFocus-1);
-      renderListDetail();
-    } else if(key==='ArrowDown'){
-      listFocus = Math.min(maxIndex, listFocus+1);
-      renderListDetail();
-    } else if(key==='Enter'){
-      if(listFocus===0){
-        showScreen('lists');
-      } else if(listFocus <= list.items.length){
-        const item = list.items[listFocus-1];
-        item.done = !item.done;
-        pushLists();
-        renderListDetail();
-      } else if(listFocus === list.items.length+1){
-        keypadMode = 'additem';
-        draft = '';
-        kpRow = 0; kpCol = 0;
-        showScreen('keypad');
-      } else {
-        showScreen('share');
-      }
-    }
-  }
-
-  /* ---------------- KEYPAD screen ---------------- */
-  function renderKeypad(){
-    document.getElementById('kp-preview').innerHTML = escapeHtml(draft) + '<span class="cursor"></span>';
-    document.getElementById('kp-done').textContent = keypadMode==='newlist' ? 'Create list' : 'Add item';
-
-    const grid = document.getElementById('kp-grid');
+    const grid = $('lists-grid');
     grid.innerHTML = '';
-    KP_ROWS.forEach((row, r)=>{
-      row.forEach((key, c)=>{
-        const el = document.createElement('div');
-        el.className = 'kp-key' + (kpRow===r && kpCol===c ? ' focused':'');
-        el.textContent = key;
-        grid.appendChild(el);
+    if(lists.length===0){
+      grid.innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:20px 4px;">No lists yet — add your first one below.</div>';
+      return;
+    }
+    lists.forEach(l=>{
+      const done = l.items.filter(i=>i.done).length;
+      const card = document.createElement('div');
+      card.className = 'list-card ui';
+      card.innerHTML = `
+        <div>
+          <div class="name">${escapeHtml(l.name)}</div>
+          <div class="meta">${done} of ${l.items.length} done</div>
+        </div>
+        <div class="chev">›</div>
+      `;
+      card.addEventListener('click', ()=>{
+        currentListId = l.id;
+        showView('detail');
+        renderDetail();
       });
+      grid.appendChild(card);
     });
-    document.getElementById('kp-cancel').classList.toggle('focused', kpRow===4 && kpCol===0);
-    document.getElementById('kp-done').classList.toggle('focused', kpRow===4 && kpCol===1);
   }
 
-  function handleKeypadInput(key){
-    if(key==='ArrowUp'){
-      if(kpRow>0) kpRow--;
-      kpCol = Math.min(kpCol, KP_ROWS[Math.min(kpRow,3)].length-1);
-    } else if(key==='ArrowDown'){
-      if(kpRow<4) kpRow++;
-      if(kpRow<4) kpCol = Math.min(kpCol, KP_ROWS[kpRow].length-1);
-      else kpCol = Math.min(kpCol,1);
-    } else if(key==='ArrowLeft'){
-      if(kpRow<4){ kpCol = (kpCol - 1 + KP_ROWS[kpRow].length) % KP_ROWS[kpRow].length; }
-      else { kpCol = kpCol===0 ? 1 : 0; }
-    } else if(key==='ArrowRight'){
-      if(kpRow<4){ kpCol = (kpCol + 1) % KP_ROWS[kpRow].length; }
-      else { kpCol = kpCol===0 ? 1 : 0; }
-    } else if(key==='Enter'){
-      if(kpRow===4){
-        if(kpCol===0){
-          showScreen(keypadMode==='newlist' ? 'lists' : 'list');
-        } else {
-          const text = draft.trim();
-          if(keypadMode==='newlist'){
-            if(text.length>0){
-              const newList = { id: makeId(), name: text, items: [] };
-              lists.push(newList);
-              pushLists();
-              currentListId = newList.id;
-              listFocus = 0;
-              showScreen('list');
-            } else {
-              showScreen('lists');
-            }
-          } else {
-            if(text.length>0){
-              const list = currentList();
-              if(list){ list.items.push({ text, done:false }); pushLists(); }
-            }
-            showScreen('list');
-          }
-        }
-        return;
-      }
-      const k = keyAt(kpRow,kpCol);
-      if(k==='⌫') draft = draft.slice(0,-1);
-      else if(k==='␣') draft += ' ';
-      else if(draft.length < 60) draft += k;
-    } else if(key==='Backspace'){
-      draft = draft.slice(0,-1);
-    }
-    renderKeypad();
+  $('new-list-btn').addEventListener('click', addList);
+  $('new-list-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addList(); });
+  function addList(){
+    const input = $('new-list-input');
+    const name = input.value.trim();
+    if(!name) return;
+    const newList = { id: makeId(), name, items: [] };
+    lists.push(newList);
+    input.value = '';
+    pushLists();
+    renderLists();
   }
 
-  /* ---------------- SHARE screen ---------------- */
-  function buildShareText(){
-    const list = currentList();
-    if(!list || list.items.length===0) return `${list ? list.name : 'This list'} is empty.`;
-    const lines = list.items.map(i => `${i.done ? '✓' : '-'} ${i.text}`);
-    return `${list.name}\n${lines.join('\n')}`;
-  }
-  function renderShare(){
-    const list = currentList();
-    document.getElementById('share-title').textContent = list ? `Share "${list.name}"` : 'Share list';
-    document.getElementById('share-text').textContent = buildShareText();
-    document.getElementById('share-status').textContent = '';
-    shareFocus = 0;
-    updateShareFocus();
-  }
-  function updateShareFocus(){
-    document.getElementById('btn-back').classList.toggle('focused', shareFocus===0);
-    document.getElementById('btn-send').classList.toggle('focused', shareFocus===1);
-  }
-  function handleShareInput(key){
-    if(key==='ArrowUp' || key==='ArrowLeft'){ shareFocus = 0; updateShareFocus(); }
-    else if(key==='ArrowDown' || key==='ArrowRight'){ shareFocus = 1; updateShareFocus(); }
-    else if(key==='Enter'){
-      if(shareFocus===0) showScreen('list');
-      else sendText();
-    }
-  }
-  function sendText(){
-    const status = document.getElementById('share-status');
-    const body = encodeURIComponent(buildShareText());
-    status.textContent = 'Opening Messages…';
-    try{ window.location.href = `sms:?body=${body}`; }
-    catch(e){ status.textContent = 'Could not open Messages on this device.'; }
-  }
-
-  /* ---------------- global input dispatch ---------------- */
-  window.addEventListener('keydown', (e)=>{
-    const key = e.key;
-    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter'].includes(key)){
-      e.preventDefault();
-    }
-    if(screen==='pairing') handlePairingInput(key);
-    else if(screen==='lists') handleListsInput(key);
-    else if(screen==='list') handleListDetailInput(key);
-    else if(screen==='keypad') handleKeypadInput(key);
-    else if(screen==='share') handleShareInput(key);
+  /* ---------------- DETAIL view ---------------- */
+  $('back-link').addEventListener('click', ()=>{
+    currentListId = null;
+    showView('lists');
+    renderLists();
   });
 
-  /* click fallback support, harmless if unused */
-  document.getElementById('pair-continue').addEventListener('click', ()=> handlePairingInput('Enter'));
-  document.getElementById('kp-cancel').addEventListener('click', ()=>{ kpRow=4; kpCol=0; handleKeypadInput('Enter'); });
-  document.getElementById('kp-done').addEventListener('click', ()=>{ kpRow=4; kpCol=1; handleKeypadInput('Enter'); });
-  document.getElementById('btn-back').addEventListener('click', ()=>{ shareFocus=0; handleShareInput('Enter'); });
-  document.getElementById('btn-send').addEventListener('click', ()=>{ shareFocus=1; handleShareInput('Enter'); });
+  function renderDetail(){
+    const list = currentList();
+    if(!list){ showView('lists'); renderLists(); return; }
+    $('detail-title').textContent = list.name;
+    const container = $('items-container');
+    container.innerHTML = '';
+    list.items.forEach((item, i)=>{
+      const row = document.createElement('div');
+      row.className = 'item-row ui' + (item.done ? ' done':'');
+      row.innerHTML = `
+        <input type="checkbox" ${item.done ? 'checked':''} data-idx="${i}">
+        <div class="text">${escapeHtml(item.text)}</div>
+        <div class="del" data-idx="${i}">Remove</div>
+      `;
+      row.querySelector('input').addEventListener('change', (e)=>{
+        item.done = e.target.checked;
+        pushLists();
+        renderDetail();
+      });
+      row.querySelector('.del').addEventListener('click', ()=>{
+        list.items.splice(i,1);
+        pushLists();
+        renderDetail();
+      });
+      container.appendChild(row);
+    });
+    if(list.items.length===0){
+      container.innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:10px 2px;">No items yet — add one below.</div>';
+    }
+  }
+
+  $('new-item-btn').addEventListener('click', addItem);
+  $('new-item-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addItem(); });
+  function addItem(){
+    const list = currentList();
+    if(!list) return;
+    const input = $('new-item-input');
+    const text = input.value.trim();
+    if(!text) return;
+    list.items.push({ text, done:false });
+    input.value = '';
+    pushLists();
+    renderDetail();
+  }
+
+  $('share-btn').addEventListener('click', async ()=>{
+    const list = currentList();
+    if(!list) return;
+    const lines = list.items.map(i => `${i.done ? '✓' : '-'} ${i.text}`);
+    const text = `${list.name}\n${lines.join('\n')}`;
+    if(navigator.share){
+      try{ await navigator.share({ text }); }catch(e){ /* user cancelled */ }
+    } else if(navigator.clipboard){
+      try{
+        await navigator.clipboard.writeText(text);
+        setSyncStatus('Copied to clipboard');
+      }catch(e){
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+      }
+    } else {
+      window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+    }
+  });
 
   /* ---------------- boot ---------------- */
   (async function boot(){
-    renderLists(); // show cached data immediately, no blank screen
-    await ensurePaired();
-    if(!code){
-      // couldn't reach backend yet; user can still use the app offline
-      showScreen('lists');
-    } else if(lists.length===0){
-      // first run: show pairing screen so the code is easy to read
-      showScreen('pairing');
+    if(code){
+      showView('lists');
+      await pullLists();
+      startPolling();
     } else {
-      showScreen('lists');
+      showView('pair');
     }
-    await pullLists();
-    startPolling();
   })();
 })();
 </script>
