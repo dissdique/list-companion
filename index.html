@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -208,7 +207,10 @@
 
 <header class="ui">
   <h1>Lists</h1>
-  <div class="sub" id="sync-status">·</div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="sub" id="sync-status">·</div>
+    <div class="sub" id="repair-link" style="text-decoration:underline; cursor:pointer;">Switch code</div>
+  </div>
 </header>
 
 <main>
@@ -280,7 +282,20 @@
     ['pair','lists','detail'].forEach(v => {
       $('view-' + v).classList.toggle('hide', v !== name);
     });
+    $('repair-link').classList.toggle('hide', name === 'pair');
   }
+
+  $('repair-link').addEventListener('click', ()=>{
+    if(pollTimer) clearInterval(pollTimer);
+    code = '';
+    localStorage.removeItem(CODE_KEY);
+    lists = [];
+    currentListId = null;
+    $('code-input').value = '';
+    $('pair-status').textContent = 'Find this code on your glasses, under "Pairing code" in the Lists menu.';
+    $('pair-status').classList.remove('err');
+    showView('pair');
+  });
 
   /* ---------------- pairing ---------------- */
   $('pair-btn').addEventListener('click', async ()=>{
