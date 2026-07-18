@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lists · Companion</title>
+<script
+  src="https://www.paypal.com/sdk/js?client-id=BAAzdlLKqsS1O2raYoMyi7-exqP9gGm8fvLG0kQm9xDkNGUUAxpqShcI0QYGbT1iV4Q7QzUIT5LB4w8q6g&components=hosted-buttons&enable-funding=venmo&currency=USD">
+</script>
+<style>
+  :root{
+    --bg:#fbf8f3;
+    --surface:#ffffff;
+    --ink:#20201d;
+    --ink-dim:#7a766d;
+    --line:#e8e2d6;
+    --accent:#c4790a;
+    --accent-soft:#fbeedb;
+    --danger:#b3392b;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); }
+  body{
+    font-family: "Iowan Old Style","Georgia",serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .ui{ font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+  header{
+    padding:22px 20px 14px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+  }
+  header h1{
+    font-size:22px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  header .sub{
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
+  }
+
+  main{ flex:1; padding:18px 18px 90px; max-width:520px; width:100%; margin:0 auto; }
+
+  /* ---------- PAIRING ---------- */
+  .pair-wrap{
+    margin-top:14vh;
+    text-align:center;
+  }
+  .pair-wrap .kicker{
+    font-family: -apple-system, sans-serif;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+  }
+  .pair-wrap h2{
+    font-size:26px;
+    margin:0 0 22px;
+  }
+  .code-input{
+    font-family: -apple-system, sans-serif;
+    width:100%;
+    font-size:32px;
+    letter-spacing:10px;
+    text-align:center;
+    text-transform:uppercase;
+    padding:16px 10px;
+    border-radius:14px;
+    border:2px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  .code-input:focus{ outline:none; border-color:var(--accent); }
+  .btn{
+    font-family: -apple-system, sans-serif;
+    display:block;
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+  }
+  .btn:disabled{ opacity:0.5; }
+  .btn.ghost{
+    background:none;
+    color:var(--ink-dim);
+    border:1px solid var(--line);
+  }
+  .status-line{
+    font-family: -apple-system, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:14px;
+    min-height:18px;
+  }
+  .status-line.err{ color:var(--danger); }
+
+  /* ---------- LISTS ---------- */
+  .lists-grid{ display:flex; flex-direction:column; gap:10px; }
+  .list-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .list-card .name{ font-size:19px; font-weight:600; }
+  .list-card .meta{
+    font-family: -apple-system, sans-serif;
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:2px;
+  }
+  .list-card .chev{ color:var(--ink-dim); font-size:20px; }
+
+  .add-row{
+    display:flex; gap:10px; margin-top:16px;
+  }
+  .add-row input{
+    font-family: inherit;
+    flex:1;
+    font-size:16px;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--surface);
+  }
+  .add-row input:focus{ outline:none; border-color:var(--accent); }
+  .add-row button{
+    font-family: -apple-system, sans-serif;
+    font-size:15px;
+    font-weight:600;
+    padding:0 20px;
+    border-radius:14px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+  }
+
+  /* ---------- LIST DETAIL ---------- */
+  .back-link{
+    font-family: -apple-system, sans-serif;
+    color:var(--ink-dim);
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:16px;
+  }
+  .item-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:8px;
+  }
+  .item-row input[type=checkbox]{
+    width:22px; height:22px;
+    accent-color: var(--accent);
+  }
+  .item-row .text{ flex:1; font-size:17px; }
+  .item-row.done .text{ color:var(--ink-dim); text-decoration:line-through; }
+  .item-row .del{
+    font-family: -apple-system, sans-serif;
+    color:var(--ink-dim);
+    font-size:13px;
+    padding:6px 8px;
+  }
+
+  .share-btn{
+    font-family: -apple-system, sans-serif;
+    margin-top:18px;
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    font-size:15px;
+    font-weight:600;
+  }
+
+  footer{
+    font-family: -apple-system, sans-serif;
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-dim);
+    padding:14px;
+  }
+  .hide{ display:none !important; }
+</style>
+</head>
+<body>
+
+<header class="ui">
+  <h1>Lists</h1>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="sub" id="sync-status">·</div>
+    <div class="sub" id="repair-link" style="text-decoration:underline; cursor:pointer;">Switch code</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- PAIRING VIEW -->
+  <section id="view-pair" class="pair-wrap hide">
+    <div class="kicker">Connect to your glasses</div>
+    <h2>Enter your pairing code</h2>
+    <input class="code-input" id="code-input" maxlength="6" placeholder="------" autocapitalize="characters" autocomplete="off" autocorrect="off" inputmode="text">
+    <button class="btn" id="pair-btn">Connect</button>
+    <div class="status-line" id="pair-status">Find this code on your glasses, under "Pairing code" in the Lists menu.</div>
+  </section>
+
+  <!-- LISTS VIEW -->
+  <section id="view-lists" class="hide">
+    <div class="lists-grid" id="lists-grid"></div>
+    <div class="add-row">
+      <input type="text" id="new-list-input" placeholder="New list name…" autocomplete="off">
+      <button id="new-list-btn">Add</button>
+    </div>
+  </section>
+
+  <!-- LIST DETAIL VIEW -->
+  <section id="view-detail" class="hide">
+    <div class="back-link" id="back-link">&larr; All lists</div>
+    <h2 id="detail-title" style="margin:0 0 16px;"></h2>
+    <div id="items-container"></div>
+    <div class="add-row">
+      <input type="text" id="new-item-input" placeholder="Add an item…" autocomplete="off">
+      <button id="new-item-btn">Add</button>
+    </div>
+    <button class="share-btn" id="share-btn">Share this list</button>
+  </section>
+
+</main>
+
+<footer>Syncs automatically with your Meta Ray-Ban Display glasses</footer>
+
+<div id="paypal-container-E3XCQ9BMJH35N"></div>
+<script>
+  paypal.HostedButtons({
+    hostedButtonId: "E3XCQ9BMJH35N",
+  }).render("#paypal-container-E3XCQ9BMJH35N")
+</script>
+
+<script>
+(function(){
+  // ---- CONFIGURE THIS after you deploy the backend ----
+  const BACKEND_URL = 'https://list-backend-0dsb.onrender.com';
+  const CODE_KEY = 'mrbd-companion-code';
+  const POLL_MS = 4000;
+
+  let code = localStorage.getItem(CODE_KEY) || '';
+  let lists = [];
+  let currentListId = null;
+  let pollTimer = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function setSyncStatus(text, isErr){
+    $('sync-status').textContent = text;
+    $('sync-status').style.color = isErr ? '#b3392b' : '';
+  }
+
+  function currentList(){ return lists.find(l => l.id === currentListId); }
+  function makeId(){ return 'l' + Date.now() + Math.floor(Math.random()*1000); }
+
+  /* ---------------- view switching ---------------- */
+  function showView(name){
+    ['pair','lists','detail'].forEach(v => {
+      $('view-' + v).classList.toggle('hide', v !== name);
+    });
+    $('repair-link').classList.toggle('hide', name === 'pair');
+  }
+
+  $('repair-link').addEventListener('click', ()=>{
+    if(pollTimer) clearInterval(pollTimer);
+    code = '';
+    localStorage.removeItem(CODE_KEY);
+    lists = [];
+    currentListId = null;
+    $('code-input').value = '';
+    $('pair-status').textContent = 'Find this code on your glasses, under "Pairing code" in the Lists menu.';
+    $('pair-status').classList.remove('err');
+    showView('pair');
+  });
+
+  /* ---------------- pairing ---------------- */
+  $('pair-btn').addEventListener('click', async ()=>{
+    const val = $('code-input').value.trim().toUpperCase();
+    if(val.length < 4){
+      $('pair-status').textContent = 'Enter the 6-character code from your glasses.';
+      $('pair-status').classList.add('err');
+      return;
+    }
+    $('pair-btn').disabled = true;
+    $('pair-status').textContent = 'Checking…';
+    $('pair-status').classList.remove('err');
+    try{
+      const res = await fetch(`${BACKEND_URL}/api/pair/${val}`);
+      const data = await res.json();
+      if(data.valid){
+        code = val;
+        localStorage.setItem(CODE_KEY, code);
+        await pullLists();
+        showView('lists');
+        startPolling();
+      } else {
+        $('pair-status').textContent = "That code wasn't recognized. Double-check it on your glasses.";
+        $('pair-status').classList.add('err');
+      }
+    }catch(e){
+      $('pair-status').textContent = "Couldn't reach the server. Check your connection and try again.";
+      $('pair-status').classList.add('err');
+    }
+    $('pair-btn').disabled = false;
+  });
+
+  /* ---------------- sync ---------------- */
+  async function pullLists(){
+    if(!code) return;
+    try{
+      const res = await fetch(`${BACKEND_URL}/api/lists/${code}`);
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      lists = data.lists || [];
+      setSyncStatus('Synced');
+      renderCurrentView();
+    }catch(e){
+      setSyncStatus('Offline', true);
+    }
+  }
+  async function pushLists(){
+    if(!code) return;
+    try{
+      await fetch(`${BACKEND_URL}/api/lists/${code}`, {
+        method:'PUT',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ lists })
+      });
+      setSyncStatus('Synced');
+    }catch(e){
+      setSyncStatus('Offline', true);
+    }
+  }
+  function startPolling(){
+    if(pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(pullLists, POLL_MS);
+  }
+  function renderCurrentView(){
+    if(!$('view-detail').classList.contains('hide')) renderDetail();
+    else if(!$('view-lists').classList.contains('hide')) renderLists();
+  }
+
+  /* ---------------- LISTS view ---------------- */
+  function renderLists(){
+    const grid = $('lists-grid');
+    grid.innerHTML = '';
+    if(lists.length===0){
+      grid.innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:20px 4px;">No lists yet — add your first one below.</div>';
+      return;
+    }
+    lists.forEach(l=>{
+      const done = l.items.filter(i=>i.done).length;
+      const card = document.createElement('div');
+      card.className = 'list-card ui';
+      card.innerHTML = `
+        <div>
+          <div class="name">${escapeHtml(l.name)}</div>
+          <div class="meta">${done} of ${l.items.length} done</div>
+        </div>
+        <div class="chev">›</div>
+      `;
+      card.addEventListener('click', ()=>{
+        currentListId = l.id;
+        showView('detail');
+        renderDetail();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  $('new-list-btn').addEventListener('click', addList);
+  $('new-list-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addList(); });
+  function addList(){
+    const input = $('new-list-input');
+    const name = input.value.trim();
+    if(!name) return;
+    const newList = { id: makeId(), name, items: [] };
+    lists.push(newList);
+    input.value = '';
+    pushLists();
+    renderLists();
+  }
+
+  /* ---------------- DETAIL view ---------------- */
+  $('back-link').addEventListener('click', ()=>{
+    currentListId = null;
+    showView('lists');
+    renderLists();
+  });
+
+  function renderDetail(){
+    const list = currentList();
+    if(!list){ showView('lists'); renderLists(); return; }
+    $('detail-title').textContent = list.name;
+    const container = $('items-container');
+    container.innerHTML = '';
+    list.items.forEach((item, i)=>{
+      const row = document.createElement('div');
+      row.className = 'item-row ui' + (item.done ? ' done':'');
+      row.innerHTML = `
+        <input type="checkbox" ${item.done ? 'checked':''} data-idx="${i}">
+        <div class="text">${escapeHtml(item.text)}</div>
+        <div class="del" data-idx="${i}">Remove</div>
+      `;
+      row.querySelector('input').addEventListener('change', (e)=>{
+        item.done = e.target.checked;
+        pushLists();
+        renderDetail();
+      });
+      row.querySelector('.del').addEventListener('click', ()=>{
+        list.items.splice(i,1);
+        pushLists();
+        renderDetail();
+      });
+      container.appendChild(row);
+    });
+    if(list.items.length===0){
+      container.innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:10px 2px;">No items yet — add one below.</div>';
+    }
+  }
+
+  $('new-item-btn').addEventListener('click', addItem);
+  $('new-item-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addItem(); });
+  function addItem(){
+    const list = currentList();
+    if(!list) return;
+    const input = $('new-item-input');
+    const text = input.value.trim();
+    if(!text) return;
+    list.items.push({ text, done:false });
+    input.value = '';
+    pushLists();
+    renderDetail();
+  }
+
+  $('share-btn').addEventListener('click', async ()=>{
+    const list = currentList();
+    if(!list) return;
+    const lines = list.items.map(i => `${i.done ? '✓' : '-'} ${i.text}`);
+    const text = `${list.name}\n${lines.join('\n')}`;
+    if(navigator.share){
+      try{ await navigator.share({ text }); }catch(e){ /* user cancelled */ }
+    } else if(navigator.clipboard){
+      try{
+        await navigator.clipboard.writeText(text);
+        setSyncStatus('Copied to clipboard');
+      }catch(e){
+        window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+      }
+    } else {
+      window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+    }
+  });
+
+  /* ---------------- boot ---------------- */
+  (async function boot(){
+    if(code){
+      showView('lists');
+      $('lists-grid').innerHTML = '<div style="color:var(--ink-dim); font-family:-apple-system,sans-serif; font-size:14px; padding:20px 4px;">Connecting to your lists… this can take up to a minute if it hasn\'t been used in a while.</div>';
+      setSyncStatus('Connecting…');
+      await pullLists();
+      startPolling();
+    } else {
+      showView('pair');
+    }
+  })();
+})();
+</script>
+</body>
+</html>
